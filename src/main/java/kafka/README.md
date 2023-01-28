@@ -9,7 +9,7 @@ Basically, there are four steps to create a java producer, as discussed earlier:
 5. Check the output in the terminal of broker
 
 ```
-kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic my_first --group first_app
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic video-stream-event --group debug
 ```
 
 ## Creating Kafka Consumer

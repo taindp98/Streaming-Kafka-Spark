@@ -1,2 +1,7 @@
 *.jar
 *.avi
+*.png
+*.jpg
+target/*
+.idea/*
+tmp/*

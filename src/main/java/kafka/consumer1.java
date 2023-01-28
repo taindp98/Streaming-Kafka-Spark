@@ -24,8 +24,8 @@ public class consumer1 {
 
         // Creating consumer properties
         String bootstrapServers = "127.0.0.1:9092";
-        String group_id = "first_app";
-        String topic = "2nd-app";
+        String group_id = "debug";
+        String topic = "video-stream-event";
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());

@@ -63,7 +63,7 @@ public class VideoEventGenerator implements Runnable {
             int type = mat.type();
             byte[] data = new byte[(int) (mat.total() * mat.channels())];
             mat.get(0, 0, data);
-            String timestamp = new Timestamp(System.currentTimeMillis()).toString();
+            String timestamp = new Timestamp(System.currentTimeMillis()).toString().replaceAll("\\s+", "-").replace(".", "-").replace(":", "-");
             JsonObject obj = new JsonObject();
             obj.addProperty("cameraId",cameraId);
             obj.addProperty("timestamp", timestamp);
