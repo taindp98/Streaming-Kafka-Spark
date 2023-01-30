@@ -38,10 +38,10 @@ public class consumer1 {
 
         // Subscribing
         consumer.subscribe(Arrays.asList(topic));
-
+//        consumer.subscribe(topic);
         // Polling
         while(true){
-            ConsumerRecords<String,String> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String,String> records = consumer.poll(100);
             for (ConsumerRecord<String,String> record: records){
                 System.out.println("Key: "+record.key() + ";" + "Value: "+record.value());
 //                logger.info("Key: "+record.key() + ";" + "Value: "+record.value());

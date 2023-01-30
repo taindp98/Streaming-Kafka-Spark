@@ -74,10 +74,10 @@ public class VideoStreamConsumer {
             final String saveImgDir = prop.getProperty("processed.output.dir");
             // Subscribing
             consumer.subscribe(Arrays.asList(prop.getProperty("kafka.topic")));
-
+//            consumer.subscribe(prop.getProperty("kafka.topic"));
             // Polling
             while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                ConsumerRecords<String, String> records = consumer.poll(100);
                 for (ConsumerRecord<String, String> record : records) {
                     JsonObject msg = new Gson().fromJson(record.value(), JsonObject.class);
                     Mat img = getMat(msg);
