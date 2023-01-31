@@ -37,10 +37,7 @@ public class VideoProcessing implements Serializable{
         if (previousProcessedEventData != null) {
             logger.warn("cameraId=" + camId + " previous processed timestamp=" + previousProcessedEventData.getTimestamp());
             Mat preFrame = getMat(previousProcessedEventData);
-            Mat preGrayFrame = new Mat(preFrame.size(), CvType.CV_8UC1);
-            Imgproc.cvtColor(preFrame, preGrayFrame, Imgproc.COLOR_BGR2GRAY);
-            Imgproc.GaussianBlur(preGrayFrame, preGrayFrame, new Size(3, 3), 0);
-            firstFrame = preGrayFrame;
+            firstFrame = preFrame;
         }
 
         //sort by timestamp
@@ -48,17 +45,20 @@ public class VideoProcessing implements Serializable{
         while(frames.hasNext()){
             sortedList.add(frames.next());
         }
-        sortedList.sort(Comparator.comparing(VideoEventData::getTimestamp));
+
+        sortedList.sort(Comparator.comparing(VideoEventData::getTimestamp));  //need to investigate the type of this var
         logger.warn("cameraId="+camId+" total frames="+sortedList.size());
 
         //iterate and detect motion
         for (VideoEventData eventData : sortedList) {
             frame = getMat(eventData);
 
-            logger.warn("Motion detected for cameraId=" + eventData.getCameraId() + ", timestamp="+ eventData.getTimestamp());
-            //save image file
-            saveImage(frame, eventData, outputDir);
-
+            logger.warn("Processing the event of cameraId=" + eventData.getCameraId() + ", timestamp="+ eventData.getTimestamp());
+            if (firstFrame != null) {
+                //save image file
+                saveImage(frame, eventData, outputDir);
+            }
+            firstFrame = frame;
             currentProcessedEventData = eventData;
         }
         return currentProcessedEventData;
@@ -72,7 +72,8 @@ public class VideoProcessing implements Serializable{
 
     //Save image file
     private static void saveImage(Mat mat,VideoEventData ed,String outputDir){
-        String imagePath = outputDir+ed.getCameraId()+"-T-"+ed.getTimestamp().getTime()+".png";
+        String timestamp = ed.getTimestamp().replaceAll("\\s+", "-").replace(".", "-").replace(":", "-");
+        String imagePath = outputDir+ed.getCameraId()+"-T-"+timestamp+".png";
         logger.warn("Saving images to "+imagePath);
         boolean result = Imgcodecs.imwrite(imagePath, mat);
         if(!result){

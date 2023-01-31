@@ -8,10 +8,10 @@
     <packaging>jar</packaging>
     <version>0.0.1</version>
 
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+<!--    <properties>-->
+<!--        <maven.compiler.source>1.8</maven.compiler.source>-->
+<!--        <maven.compiler.target>1.8</maven.compiler.target>-->
+<!--    </properties>-->
     
     <!-- define dependencies  -->
     <dependencies>
@@ -59,26 +59,54 @@
 
 
     <build>
+<!--        <resources>-->
+<!--            <resource>-->
+<!--                <directory>${basedir}/src/main/resources</directory>-->
+<!--            </resource>-->
+<!--        </resources>-->
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
-<!--                        <configuration>-->
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
 <!--                            <transformers>-->
 <!--                                <transformer-->
-<!--                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-<!--                                    &lt;!&ndash; <mainClass>hello.HelloWorld</mainClass> &ndash;&gt;-->
-<!--                                    <mainClass>kafka.producer1</mainClass>-->
+<!--                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">-->
+<!--                                    <resource>reference.conf</resource>-->
+<!--                                </transformer>-->
+<!--                                <transformer-->
+<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <mainClass>com.iot.video.app.spark.processor.VideoStreamProcessor</mainClass>-->
 <!--                                </transformer>-->
 <!--                            </transformers>-->
-<!--                        </configuration>-->
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

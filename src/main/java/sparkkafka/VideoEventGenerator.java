@@ -1,8 +1,7 @@
-package kafka;
+package sparkkafka;
 
-import java.sql.Timestamp;
-import java.util.Base64;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
@@ -14,8 +13,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+
+import java.sql.Timestamp;
+import java.util.Base64;
 public class VideoEventGenerator implements Runnable {
     private static final Logger logger = Logger.getLogger(VideoEventGenerator.class);
     private String cameraId;

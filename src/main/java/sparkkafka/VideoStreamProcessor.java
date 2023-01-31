@@ -14,12 +14,16 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.KeyValueGroupedDataset;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.streaming.GroupState;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.apache.spark.sql.types.StringType;
 import org.apache.spark.SparkConf;
+
+import javax.xml.crypto.Data;
 
 public class VideoStreamProcessor {
     private static final Logger logger = Logger.getLogger(VideoStreamProcessor.class);
@@ -41,32 +45,33 @@ public class VideoStreamProcessor {
     public static void main(String[] args) throws Exception {
         Properties ConsumerProp = GetConsumerConfig();
 
-        SparkConf conf = new SparkConf()
-                .setAppName("VideoStreamProcessor")
-//                .set("spark.driver.bindAddress", "localhost")
-                .setMaster(ConsumerProp.getProperty("spark.master.url"));
-
+//        SparkConf conf = new SparkConf()
+//                .setAppName("VideoStreamProcessor")
+////                .set("spark.driver.bindAddress", "localhost")
+//                .setMaster(ConsumerProp.getProperty("spark.master.url"));
 //        SparkSession spark = SparkSession
 //                .builder()
-//                .appName("VideoStreamProcessor")
-//                .master(ConsumerProp.getProperty("spark.master.url"))
+//                .config(conf)
 //                .getOrCreate();
 
         SparkSession spark = SparkSession
                 .builder()
-                .config(conf)
+                .appName("VideoStreamProcessor")
+                .master(ConsumerProp.getProperty("spark.master.url"))
                 .getOrCreate();
+
+
 
         final String processedImageDir = ConsumerProp.getProperty("processed.output.dir");
         logger.warn("Output directory for saving processed images is set to "+processedImageDir+". This is configured in processed.output.dir key of property file.");
-        StructType schema =  DataTypes.createStructType(new StructField[] {
-                DataTypes.createStructField("cameraId", DataTypes.StringType, true),
-                DataTypes.createStructField("timestamp", DataTypes.TimestampType, true),
-                DataTypes.createStructField("rows", DataTypes.IntegerType, true),
-                DataTypes.createStructField("cols", DataTypes.IntegerType, true),
-                DataTypes.createStructField("type", DataTypes.IntegerType, true),
-                DataTypes.createStructField("data", DataTypes.StringType, true)
-        });
+
+        StructType schema = new StructType();
+        schema = schema.add("cameraId", DataTypes.StringType, false);
+        schema = schema.add("timestamp", DataTypes.StringType, false);
+        schema = schema.add("rows", DataTypes.IntegerType, false);
+        schema = schema.add("cols", DataTypes.IntegerType, false);
+        schema = schema.add("type", DataTypes.IntegerType, false);
+        schema = schema.add("data", DataTypes.StringType, false);
 
         Dataset<VideoEventData> ds = spark
                 .readStream()
@@ -75,15 +80,25 @@ public class VideoStreamProcessor {
                 .option("subscribe", ConsumerProp.getProperty("kafka.topic"))
                 .option("kafka.max.partition.fetch.bytes", ConsumerProp.getProperty("kafka.max.partition.fetch.bytes"))
                 .option("kafka.max.poll.records", ConsumerProp.getProperty("kafka.max.poll.records"))
-                .option("startingOffsets", "earliest")
                 .load()
                 .selectExpr("CAST(value AS STRING) as message")
-                .select(functions.from_json(functions.col("message"),schema).as("json"))
+                .select(functions.from_json(functions.col("message"), schema).as("json"))
                 .select("json.*")
                 .as(Encoders.bean(VideoEventData.class));
 
 
         ds.printSchema();
+//        debug
+//        ds.createOrReplaceTempView("empData");
+//        Dataset<Row> check_query = spark.sql("select * from empData");
+//        StreamingQuery query = check_query.writeStream()
+//                .outputMode("update")
+//                .format("console")
+//                .start();
+        //await
+//        query.awaitTermination();
+
+
         KeyValueGroupedDataset<String, VideoEventData> kvDataset = ds.groupByKey(new MapFunction<VideoEventData, String>() {
             @Override
             public String call(VideoEventData value) throws Exception {
@@ -104,8 +119,8 @@ public class VideoStreamProcessor {
                 //detect motion
                 System.out.println("Process Video Event Data");
                 System.out.println(values);
-                VideoEventData processed = VideoProcessing.takeFrame(key,values,processedImageDir,existing);
 
+                VideoEventData processed = VideoProcessing.takeFrame(key,values,processedImageDir,existing);
                 //update last processed
                 if(processed != null){
                     state.update(processed);
@@ -113,7 +128,7 @@ public class VideoStreamProcessor {
                 return processed;
             }}, Encoders.bean(VideoEventData.class), Encoders.bean(VideoEventData.class));
 
-        //start
+//        start
         StreamingQuery query = processedDataset.writeStream()
                 .outputMode("update")
                 .format("console")

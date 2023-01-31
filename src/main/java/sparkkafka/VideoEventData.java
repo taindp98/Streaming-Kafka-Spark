@@ -1,10 +1,11 @@
 package sparkkafka;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.sql.Timestamp;
 public class VideoEventData implements Serializable {
     private String cameraId;
-    private Timestamp timestamp;
+    private String timestamp;
     private int rows;
     private int cols;
     private int type;
@@ -16,12 +17,14 @@ public class VideoEventData implements Serializable {
     public void setCameraId(String cameraId) {
         this.cameraId = cameraId;
     }
-    public Timestamp getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
-    public void setTimestamp(Timestamp timestamp) {
+
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
+
     public int getRows() {
         return rows;
     }
